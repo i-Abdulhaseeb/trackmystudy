@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:get/get.dart';
+
 import '../models/course_item.dart';
 import '../models/recent_document.dart';
 import '../models/pinned_document.dart';
-import '../models/assessment_info.dart';
 
 class DashboardController extends GetxController {
   final RxString activeTopTab = 'Dashboard'.obs;
@@ -12,13 +11,6 @@ class DashboardController extends GetxController {
   final RxString selectedFilter = 'ALL_TYPES'.obs;
   final RxBool isSemester4Expanded = true.obs;
   final RxBool isSemester3Expanded = false.obs;
-
-  final RxInt days = 6.obs;
-  final RxInt hours = 11.obs;
-  final RxInt minutes = 24.obs;
-  final RxInt seconds = 38.obs;
-
-  Timer? _timer;
 
   final RxList<CourseItem> courses = <CourseItem>[
     const CourseItem(
@@ -92,53 +84,6 @@ class DashboardController extends GetxController {
       code: 'CS-307',
     ),
   ].obs;
-
-  final assessment = const AssessmentInfo(
-    title: 'Calculus',
-    status: 'CONFIRMED',
-    examType: 'Midterm Examination',
-    date: '15 October 2026',
-    time: '9:00 AM',
-    room: 'Room C-204',
-    days: 6,
-    hours: 11,
-    minutes: 24,
-    seconds: 38,
-  );
-
-  @override
-  void onInit() {
-    super.onInit();
-    _startCountdown();
-  }
-
-  void _startCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (seconds.value > 0) {
-        seconds.value--;
-      } else {
-        if (minutes.value > 0) {
-          minutes.value--;
-          seconds.value = 59;
-        } else if (hours.value > 0) {
-          hours.value--;
-          minutes.value = 59;
-          seconds.value = 59;
-        } else if (days.value > 0) {
-          days.value--;
-          hours.value = 23;
-          minutes.value = 59;
-          seconds.value = 59;
-        }
-      }
-    });
-  }
-
-  @override
-  void onClose() {
-    _timer?.cancel();
-    super.onClose();
-  }
 
   void setActiveTopTab(String tab) {
     activeTopTab.value = tab;

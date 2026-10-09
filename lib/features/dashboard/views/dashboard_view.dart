@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../exams/views/exam_view.dart';
+import '../../exams/widgets/exam_status_bar.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/shortcut_badge.dart';
@@ -21,14 +24,18 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
-    final DashboardController dashboardController = Get.find<DashboardController>();
-    final FileManagerController fileController = Get.find<FileManagerController>();
+    final DashboardController dashboardController =
+        Get.find<DashboardController>();
+    final FileManagerController fileController =
+        Get.find<FileManagerController>();
 
     return Obx(() {
       final palette = themeController.palette;
       final activeItem = dashboardController.activeSidebarItem.value;
 
-      final isFileManager = activeItem == 'All Files' ||
+      final isExamSchedule = activeItem == 'Exam Schedule';
+      final isFileManager =
+          activeItem == 'All Files' ||
           activeItem == 'Favorites' ||
           activeItem == 'Tags';
 
@@ -37,7 +44,7 @@ class DashboardView extends StatelessWidget {
         body: Column(
           children: [
             const AppTopBar(),
-            const AppSubHeader(),
+            if (!isExamSchedule) const AppSubHeader(),
             Expanded(
               child: Row(
                 children: [
@@ -45,40 +52,57 @@ class DashboardView extends StatelessWidget {
                   Expanded(
                     child: isFileManager
                         ? const FileManagerView()
+                        : isExamSchedule
+                        ? const ExamView()
                         : Container(
                             color: palette.background,
                             child: SingleChildScrollView(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 20,
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Dashboard',
-                                            style: AppTypography.headlineXl(palette.textPrimary),
+                                            style: AppTypography.headlineXl(
+                                              palette.textPrimary,
+                                            ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             'Your courses, documents, and upcoming examinations.',
-                                            style: AppTypography.bodySm(palette.textSecondary),
+                                            style: AppTypography.bodySm(
+                                              palette.textSecondary,
+                                            ),
                                           ),
                                         ],
                                       ),
                                       InkWell(
-                                        onTap: fileController.pickAndImportFiles,
+                                        onTap:
+                                            fileController.pickAndImportFiles,
                                         borderRadius: BorderRadius.circular(4),
                                         child: Container(
                                           height: 32,
-                                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: palette.primary,
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -91,15 +115,21 @@ class DashboardView extends StatelessWidget {
                                               const SizedBox(width: 8),
                                               Text(
                                                 'Import Files',
-                                                style: AppTypography.bodySm(palette.onPrimary).copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                                style:
+                                                    AppTypography.bodySm(
+                                                      palette.onPrimary,
+                                                    ).copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                               ),
                                               const SizedBox(width: 8),
                                               ShortcutBadge(
                                                 shortcut: 'Ctrl+0',
-                                                backgroundColor: Colors.transparent,
-                                                borderColor: palette.onPrimary.withValues(alpha: 0.3),
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                borderColor: palette.onPrimary
+                                                    .withValues(alpha: 0.3),
                                                 textColor: palette.onPrimary,
                                               ),
                                             ],
@@ -125,7 +155,10 @@ class DashboardView extends StatelessWidget {
                 ],
               ),
             ),
-            const AppFooterStatusBar(),
+            if (isExamSchedule)
+              const ExamStatusBar()
+            else
+              const AppFooterStatusBar(),
           ],
         ),
       );
