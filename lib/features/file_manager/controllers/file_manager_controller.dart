@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../models/app_file_model.dart';
-// import '../../document_viewer/views/document_viewer_view.dart';
+import '../../document_viewer/views/document_viewer_view.dart';
 import '../../dashboard/models/recent_document.dart';
 
 class FileManagerController extends GetxController {
@@ -363,10 +363,10 @@ class FileManagerController extends GetxController {
       await _saveFiles();
     }
     selectedFileId.value = file.id;
-    //  await Get.to<void>(
-    //   () =>
-    // DocumentViewerView(file: file, onTogglePin: () => togglePin(file.id)),
-    // );
+    await Get.to<void>(
+      () =>
+          DocumentViewerView(file: file, onTogglePin: () => togglePin(file.id)),
+    );
   }
 
   void openFileById(String id) {
