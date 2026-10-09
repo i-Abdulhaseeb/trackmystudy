@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/mono_badge.dart';
-import '../controllers/dashboard_controller.dart';
+import '../../file_manager/controllers/file_manager_controller.dart';
 
 class PinnedDocumentsSection extends StatelessWidget {
   const PinnedDocumentsSection({super.key});
@@ -11,11 +12,13 @@ class PinnedDocumentsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
-    final DashboardController dashboardController = Get.find<DashboardController>();
+    final fileController = Get.find<FileManagerController>();
 
     return Obx(() {
       final palette = themeController.palette;
-      final pinnedDocs = dashboardController.pinnedDocuments;
+      final pinnedDocs = fileController.files
+          .where((file) => file.isPinned)
+          .toList();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,10 +30,8 @@ class PinnedDocumentsSection extends StatelessWidget {
                 children: [
                   Text(
                     'Pinned Documents',
-                    style: AppTypography.headlineLg(palette.textPrimary).copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.headlineLg(palette.textPrimary)
+                        .copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -52,9 +53,9 @@ class PinnedDocumentsSection extends StatelessWidget {
             children: pinnedDocs.map((item) {
               return _PinnedItemCard(
                 name: item.name,
-                code: item.code,
+                code: item.course,
                 palette: palette,
-                onTap: dashboardController.noOp,
+                onTap: () => fileController.openFile(item),
               );
             }).toList(),
           ),
@@ -107,11 +108,7 @@ class _PinnedItemCardState extends State<_PinnedItemCard> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.star_border,
-                size: 14,
-                color: palette.textSecondary,
-              ),
+              Icon(Icons.star_border, size: 14, color: palette.textSecondary),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(

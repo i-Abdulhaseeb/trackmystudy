@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/mono_badge.dart';
 import '../controllers/dashboard_controller.dart';
+import '../../file_manager/controllers/file_manager_controller.dart';
 import '../models/recent_document.dart';
 
 class RecentDocumentsTable extends StatelessWidget {
@@ -12,12 +14,18 @@ class RecentDocumentsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
-    final DashboardController dashboardController = Get.find<DashboardController>();
+    final DashboardController dashboardController =
+        Get.find<DashboardController>();
 
     return Obx(() {
       final palette = themeController.palette;
       final selectedFilter = dashboardController.selectedFilter.value;
-      final documents = dashboardController.recentDocuments;
+      final fileController = Get.find<FileManagerController>();
+      final recent = fileController.recentFiles;
+      final documents =
+          (recent.isEmpty ? dashboardController.recentDocuments : recent).where(
+            (doc) => selectedFilter != 'PDF_ONLY' || doc.type == 'PDF',
+          );
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,10 +35,8 @@ class RecentDocumentsTable extends StatelessWidget {
             children: [
               Text(
                 'Recently Opened',
-                style: AppTypography.headlineLg(palette.textPrimary).copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.headlineLg(palette.textPrimary)
+                    .copyWith(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               Row(
                 children: [
@@ -47,7 +53,9 @@ class RecentDocumentsTable extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: selectedFilter == 'ALL_TYPES' ? palette.textPrimary : Colors.transparent,
+                            color: selectedFilter == 'ALL_TYPES'
+                                ? palette.textPrimary
+                                : Colors.transparent,
                             width: 1,
                           ),
                         ),
@@ -55,7 +63,9 @@ class RecentDocumentsTable extends StatelessWidget {
                       child: Text(
                         'ALL TYPES',
                         style: AppTypography.monoCaption(
-                          selectedFilter == 'ALL_TYPES' ? palette.textPrimary : palette.textMuted,
+                          selectedFilter == 'ALL_TYPES'
+                              ? palette.textPrimary
+                              : palette.textMuted,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -74,7 +84,9 @@ class RecentDocumentsTable extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: selectedFilter == 'PDF_ONLY' ? palette.textPrimary : Colors.transparent,
+                            color: selectedFilter == 'PDF_ONLY'
+                                ? palette.textPrimary
+                                : Colors.transparent,
                             width: 1,
                           ),
                         ),
@@ -82,7 +94,9 @@ class RecentDocumentsTable extends StatelessWidget {
                       child: Text(
                         'PDF ONLY',
                         style: AppTypography.monoCaption(
-                          selectedFilter == 'PDF_ONLY' ? palette.textPrimary : palette.textMuted,
+                          selectedFilter == 'PDF_ONLY'
+                              ? palette.textPrimary
+                              : palette.textMuted,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -148,7 +162,15 @@ class RecentDocumentsTable extends StatelessWidget {
               ],
             ),
           ),
-          ...documents.map((doc) => _RecentDocumentRow(doc: doc, palette: palette, onTap: dashboardController.noOp)),
+          ...documents.map(
+            (doc) => _RecentDocumentRow(
+              doc: doc,
+              palette: palette,
+              onTap: () => doc.fileId != null
+                  ? fileController.openFileById(doc.fileId!)
+                  : fileController.openFileByName(doc.name),
+            ),
+          ),
         ],
       );
     });

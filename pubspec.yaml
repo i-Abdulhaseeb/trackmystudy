@@ -43,6 +43,10 @@ dependencies:
   window_manager: ^0.5.2
   shared_preferences: ^2.5.6
   syncfusion_flutter_pdfviewer: ^35.1.39
+  syncfusion_flutter_pdf: ^35.1.39
+  syncfusion_flutter_core: ^35.1.39
+  syncfusion_pdfviewer_platform_interface: ^35.1.39
+  url_launcher: ^6.3.2
   archive: ^4.3.0
   xml: ^7.1.0
   google_fonts: ^9.0.0

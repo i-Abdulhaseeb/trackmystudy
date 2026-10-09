@@ -915,7 +915,7 @@ packages:
     source: hosted
     version: "1.4.1"
   syncfusion_flutter_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: syncfusion_flutter_core
       sha256: "58eb8e791756a6da3cce29889f0ff0caec93703ef5ef7c8467078428c508b22a"
@@ -923,7 +923,7 @@ packages:
     source: hosted
     version: "35.1.39"
   syncfusion_flutter_pdf:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: syncfusion_flutter_pdf
       sha256: dae02b759449910243be15b8f5e135766882420f68651fde3012ecb6fcee199b
@@ -963,7 +963,7 @@ packages:
     source: hosted
     version: "35.1.39"
   syncfusion_pdfviewer_platform_interface:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: syncfusion_pdfviewer_platform_interface
       sha256: "8a1fc1d53a823f6b6302d09d58bb84e8b766647266cec400ec49a6bfe1cf5315"
@@ -1011,7 +1011,7 @@ packages:
     source: hosted
     version: "1.4.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       sha256: e8cc955c97e06df9879140a1fe301f3d493f01b7c62dec7f46834be31d7e9fda
