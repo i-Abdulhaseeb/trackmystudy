@@ -1,5 +1,8 @@
+import '../../courses/controllers/course_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/mono_badge.dart';
@@ -13,8 +16,12 @@ class AppSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
-    final DashboardController dashboardController = Get.find<DashboardController>();
-    final FileManagerController fileController = Get.find<FileManagerController>();
+    final DashboardController dashboardController =
+        Get.find<DashboardController>();
+    final FileManagerController fileController =
+        Get.find<FileManagerController>();
+
+    final courseController = Get.find<CourseController>();
 
     return Obx(() {
       final palette = themeController.palette;
@@ -48,7 +55,10 @@ class AppSidebar extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: palette.cardElevated,
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: palette.borderStrong, width: 1),
+                            border: Border.all(
+                              color: palette.borderStrong,
+                              width: 1,
+                            ),
                           ),
                           child: Icon(
                             Icons.school_outlined,
@@ -63,15 +73,20 @@ class AppSidebar extends StatelessWidget {
                             children: [
                               Text(
                                 'University Manager',
-                                style: AppTypography.headlineMd(palette.textPrimary).copyWith(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style:
+                                    AppTypography.headlineMd(
+                                      palette.textPrimary,
+                                    ).copyWith(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 'Academic Workspace',
-                                style: AppTypography.monoCaption(palette.textMuted),
+                                style: AppTypography.monoCaption(
+                                  palette.textMuted,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
@@ -90,7 +105,10 @@ class AppSidebar extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: palette.cardElevated,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: palette.borderSubtle, width: 1),
+                        border: Border.all(
+                          color: palette.borderSubtle,
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -99,9 +117,8 @@ class AppSidebar extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             'New Entry',
-                            style: AppTypography.bodySm(palette.textPrimary).copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: AppTypography.bodySm(palette.textPrimary)
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -131,6 +148,7 @@ class AppSidebar extends StatelessWidget {
                     isSelected: activeItem == 'My Courses',
                     palette: palette,
                     onTap: () {
+                      courseController.showOverview();
                       dashboardController.setActiveSidebarItem('My Courses');
                       dashboardController.setActiveTopTab('Courses');
                     },
@@ -146,7 +164,8 @@ class AppSidebar extends StatelessWidget {
                     ),
                     isSelected: activeItem == 'Search',
                     palette: palette,
-                    onTap: () => dashboardController.setActiveSidebarItem('Search'),
+                    onTap: () =>
+                        dashboardController.setActiveSidebarItem('Search'),
                   ),
                   _buildNavItem(
                     icon: Icons.calendar_today_outlined,
@@ -165,7 +184,11 @@ class AppSidebar extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 14),
-                  _buildSectionHeader('LIBRARY', palette, dashboardController.noOp),
+                  _buildSectionHeader(
+                    'LIBRARY',
+                    palette,
+                    dashboardController.noOp,
+                  ),
                   _buildNavItem(
                     icon: Icons.folder_open_outlined,
                     label: 'All Files',
@@ -181,14 +204,16 @@ class AppSidebar extends StatelessWidget {
                     label: 'Favorites',
                     isSelected: activeItem == 'Favorites',
                     palette: palette,
-                    onTap: () => dashboardController.setActiveSidebarItem('Favorites'),
+                    onTap: () =>
+                        dashboardController.setActiveSidebarItem('Favorites'),
                   ),
                   _buildNavItem(
                     icon: Icons.label_outline,
                     label: 'Tags',
                     isSelected: activeItem == 'Tags',
                     palette: palette,
-                    onTap: () => dashboardController.setActiveSidebarItem('Tags'),
+                    onTap: () =>
+                        dashboardController.setActiveSidebarItem('Tags'),
                   ),
                   const SizedBox(height: 14),
                   _buildSectionHeader(
@@ -197,27 +222,42 @@ class AppSidebar extends StatelessWidget {
                     dashboardController.noOp,
                     trailingIcon: Icons.unfold_more,
                   ),
-                  _buildSemesterGroup(
-                    title: 'Semester 4',
-                    count: '[4]',
-                    isExpanded: dashboardController.isSemester4Expanded.value,
-                    onToggle: dashboardController.toggleSemester4,
-                    palette: palette,
-                    children: [
-                      _buildCourseSubItem('Calculus', 'MATH', palette, activeItem == 'Calculus', () => dashboardController.setActiveSidebarItem('Calculus')),
-                      _buildCourseSubItem('Database Systems', 'CS302', palette, activeItem == 'Database Systems', () => dashboardController.setActiveSidebarItem('Database Systems')),
-                      _buildCourseSubItem('Theory of Automata', 'CS305', palette, activeItem == 'Theory of Automata', () => dashboardController.setActiveSidebarItem('Theory of Automata')),
-                      _buildCourseSubItem('Operating Systems', 'CS307', palette, activeItem == 'Operating Systems', () => dashboardController.setActiveSidebarItem('Operating Systems')),
-                    ],
-                  ),
-                  _buildSemesterGroup(
-                    title: 'Semester 3',
-                    count: '[ARCH]',
-                    isExpanded: dashboardController.isSemester3Expanded.value,
-                    onToggle: dashboardController.toggleSemester3,
-                    palette: palette,
-                    children: [],
-                  ),
+                  for (final semester in courseController.sortedSemesters)
+                    Opacity(
+                      opacity: semester.isArchived ? 0.5 : 1,
+                      child: _buildSemesterGroup(
+                        title: semester.name,
+                        count: semester.isArchived
+                            ? '[ARCH]'
+                            : '[${courseController.coursesFor(semester.id).length}]',
+                        isExpanded: !courseController.collapsed.contains(
+                          semester.id,
+                        ),
+                        onToggle: () =>
+                            courseController.toggleSemester(semester.id),
+                        palette: palette,
+                        children: [
+                          for (final course in courseController.coursesFor(
+                            semester.id,
+                          ))
+                            _buildCourseSubItem(
+                              course.name,
+                              course.code,
+                              palette,
+                              activeItem == 'My Courses' &&
+                                  courseController.selectedCourseId.value ==
+                                      course.id,
+                              () {
+                                courseController.openCourse(course.id);
+                                dashboardController.setActiveSidebarItem(
+                                  'My Courses',
+                                );
+                                dashboardController.setActiveTopTab('Courses');
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -233,7 +273,10 @@ class AppSidebar extends StatelessWidget {
                     },
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 4,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -252,7 +295,9 @@ class AppSidebar extends StatelessWidget {
                                     Flexible(
                                       child: Text(
                                         '${fileController.formattedTotalStorage} stored locally',
-                                        style: AppTypography.monoCaption(palette.textMuted),
+                                        style: AppTypography.monoCaption(
+                                          palette.textMuted,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -262,7 +307,9 @@ class AppSidebar extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 '${((fileController.totalSizeBytes / (5 * 1024 * 1024 * 1024)) * 100).clamp(0, 100).toStringAsFixed(0)}%',
-                                style: AppTypography.monoCaption(palette.textMuted),
+                                style: AppTypography.monoCaption(
+                                  palette.textMuted,
+                                ),
                               ),
                             ],
                           ),
@@ -270,9 +317,14 @@ class AppSidebar extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(2),
                             child: LinearProgressIndicator(
-                              value: (fileController.totalSizeBytes / (5 * 1024 * 1024 * 1024)).clamp(0.01, 1.0),
+                              value:
+                                  (fileController.totalSizeBytes /
+                                          (5 * 1024 * 1024 * 1024))
+                                      .clamp(0.01, 1.0),
                               backgroundColor: palette.cardElevated,
-                              valueColor: AlwaysStoppedAnimation<Color>(palette.textSecondary),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                palette.textSecondary,
+                              ),
                               minHeight: 3,
                             ),
                           ),
@@ -286,47 +338,65 @@ class AppSidebar extends StatelessWidget {
                     label: 'Settings',
                     isSelected: activeItem == 'Settings',
                     palette: palette,
-                    onTap: () => dashboardController.setActiveSidebarItem('Settings'),
+                    onTap: () =>
+                        dashboardController.setActiveSidebarItem('Settings'),
                   ),
                   const SizedBox(height: 6),
                   InkWell(
                     onTap: themeController.toggleTheme,
                     borderRadius: BorderRadius.circular(4),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: palette.cardElevated,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: palette.borderSubtle, width: 1),
+                        border: Border.all(
+                          color: palette.borderSubtle,
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
                           Icon(
-                            isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                            isDarkMode
+                                ? Icons.dark_mode_outlined
+                                : Icons.light_mode_outlined,
                             size: 15,
                             color: palette.textPrimary,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              isDarkMode ? 'Dark Monochrome' : 'Light Monochrome',
-                              style: AppTypography.bodySm(palette.textPrimary).copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              isDarkMode
+                                  ? 'Dark Monochrome'
+                                  : 'Light Monochrome',
+                              style: AppTypography.bodySm(palette.textPrimary)
+                                  .copyWith(fontWeight: FontWeight.w600),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: palette.badgeBg,
                               borderRadius: BorderRadius.circular(3),
-                              border: Border.all(color: palette.borderStrong, width: 1),
+                              border: Border.all(
+                                color: palette.borderStrong,
+                                width: 1,
+                              ),
                             ),
                             child: Text(
                               'SWITCH',
-                              style: AppTypography.monoShortcut(palette.textPrimary),
+                              style: AppTypography.monoShortcut(
+                                palette.textPrimary,
+                              ),
                             ),
                           ),
                         ],
@@ -376,11 +446,16 @@ class AppSidebar extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: AppTypography.bodySm(
-                    isSelected ? palette.textPrimary : palette.textSecondary,
-                  ).copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  ),
+                  style:
+                      AppTypography.bodySm(
+                        isSelected
+                            ? palette.textPrimary
+                            : palette.textSecondary,
+                      ).copyWith(
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -413,11 +488,7 @@ class AppSidebar extends StatelessWidget {
               ),
             ),
             if (trailingIcon != null)
-              Icon(
-                trailingIcon,
-                size: 12,
-                color: palette.textMuted,
-              ),
+              Icon(trailingIcon, size: 12, color: palette.textMuted),
           ],
         ),
       ),
@@ -446,7 +517,9 @@ class AppSidebar extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                    isExpanded
+                        ? Icons.keyboard_arrow_down
+                        : Icons.keyboard_arrow_right,
                     size: 14,
                     color: palette.textMuted,
                   ),
@@ -454,9 +527,8 @@ class AppSidebar extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: AppTypography.bodySm(palette.textPrimary).copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTypography.bodySm(palette.textPrimary)
+                          .copyWith(fontWeight: FontWeight.w500),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -510,10 +582,7 @@ class AppSidebar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              Text(
-                code,
-                style: AppTypography.monoCaption(palette.textMuted),
-              ),
+              Text(code, style: AppTypography.monoCaption(palette.textMuted)),
             ],
           ),
         ),

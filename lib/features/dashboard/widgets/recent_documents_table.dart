@@ -22,10 +22,9 @@ class RecentDocumentsTable extends StatelessWidget {
       final selectedFilter = dashboardController.selectedFilter.value;
       final fileController = Get.find<FileManagerController>();
       final recent = fileController.recentFiles;
-      final documents =
-          (recent.isEmpty ? dashboardController.recentDocuments : recent).where(
-            (doc) => selectedFilter != 'PDF_ONLY' || doc.type == 'PDF',
-          );
+      final documents = recent.where(
+        (doc) => selectedFilter != 'PDF_ONLY' || doc.type == 'PDF',
+      );
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

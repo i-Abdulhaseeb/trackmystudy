@@ -53,7 +53,7 @@ class PinnedDocumentsSection extends StatelessWidget {
             children: pinnedDocs.map((item) {
               return _PinnedItemCard(
                 name: item.name,
-                code: item.course,
+                code: fileController.courseFor(item),
                 palette: palette,
                 onTap: () => fileController.openFile(item),
               );

@@ -1,3 +1,5 @@
+import '../../courses/views/course_view.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,6 +35,7 @@ class DashboardView extends StatelessWidget {
       final palette = themeController.palette;
       final activeItem = dashboardController.activeSidebarItem.value;
 
+      final isCourses = activeItem == 'My Courses';
       final isExamSchedule = activeItem == 'Exam Schedule';
       final isFileManager =
           activeItem == 'All Files' ||
@@ -44,13 +47,15 @@ class DashboardView extends StatelessWidget {
         body: Column(
           children: [
             const AppTopBar(),
-            if (!isExamSchedule) const AppSubHeader(),
+            if (!isExamSchedule && !isCourses) const AppSubHeader(),
             Expanded(
               child: Row(
                 children: [
                   const AppSidebar(),
                   Expanded(
-                    child: isFileManager
+                    child: isCourses
+                        ? const CourseView()
+                        : isFileManager
                         ? const FileManagerView()
                         : isExamSchedule
                         ? const ExamView()

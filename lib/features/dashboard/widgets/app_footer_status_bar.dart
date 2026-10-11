@@ -1,5 +1,9 @@
+import '../../file_manager/controllers/file_manager_controller.dart';
+import '../../courses/controllers/course_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../controllers/dashboard_controller.dart';
@@ -10,7 +14,8 @@ class AppFooterStatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
-    final DashboardController dashboardController = Get.find<DashboardController>();
+    final DashboardController dashboardController =
+        Get.find<DashboardController>();
 
     return Obx(() {
       final palette = themeController.palette;
@@ -37,12 +42,15 @@ class AppFooterStatusBar extends StatelessWidget {
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          border: Border.all(color: palette.textMuted, width: 1),
+                          border: Border.all(
+                            color: palette.textMuted,
+                            width: 1,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'INDEXED: 79 DOCUMENTS',
+                        '${Get.find<CourseController>().courses.length} COURSES • ${Get.find<FileManagerController>().totalFilesCount} DOCUMENTS',
                         style: AppTypography.monoCaption(palette.textMuted),
                       ),
                       const SizedBox(width: 8),
