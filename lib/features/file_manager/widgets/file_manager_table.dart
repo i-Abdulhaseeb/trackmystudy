@@ -1,3 +1,5 @@
+import '../../../core/widgets/name_edit_dialog.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -145,7 +147,7 @@ class FileManagerTable extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 60,
+                    width: 92,
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Text(
@@ -290,7 +292,7 @@ class _FileManagerRowState extends State<_FileManagerRow> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    widget.file.course,
+                    Get.find<FileManagerController>().courseFor(widget.file),
                     style: AppTypography.bodySm(palette.textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -330,7 +332,7 @@ class _FileManagerRowState extends State<_FileManagerRow> {
                 ),
               ),
               SizedBox(
-                width: 60,
+                width: 92,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -346,6 +348,28 @@ class _FileManagerRowState extends State<_FileManagerRow> {
                               ? palette.textPrimary
                               : palette.textMuted,
                         ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Rename file',
+                      constraints: const BoxConstraints(
+                        minWidth: 24,
+                        minHeight: 24,
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      onPressed: () => showDialog<void>(
+                        context: context,
+                        builder: (_) => NameEditDialog(
+                          title: 'Rename file',
+                          initial: widget.file.name,
+                          onSave: (name) => Get.find<FileManagerController>()
+                              .renameFile(widget.file.id, name),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        size: 14,
+                        color: palette.textMuted,
                       ),
                     ),
                     const SizedBox(width: 2),

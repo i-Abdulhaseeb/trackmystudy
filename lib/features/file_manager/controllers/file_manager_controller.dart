@@ -12,64 +12,13 @@ import '../../document_viewer/views/document_viewer_view.dart';
 import '../../dashboard/models/recent_document.dart';
 
 class FileManagerController extends GetxController {
-  final RxList<AppFileModel> files = <AppFileModel>[
-    AppFileModel(
-      id: '1',
-      name: "Lecture 05 - Rolle's Theorem.pdf",
-      path: '/documents/math204/lecture_05.pdf',
-      sizeInBytes: 3420000,
-      extension: 'PDF',
-      dateAdded: DateTime.now().subtract(const Duration(hours: 3)),
-      course: 'Calculus',
-    ),
-    AppFileModel(
-      id: '2',
-      name: 'Database Normalization.pptx',
-      path: '/documents/cs302/normalization.pptx',
-      sizeInBytes: 12580000,
-      extension: 'PPTX',
-      dateAdded: DateTime.now().subtract(const Duration(days: 1)),
-      course: 'Database Systems',
-    ),
-    AppFileModel(
-      id: '3',
-      name: 'Automata Assignment 02.docx',
-      path: '/documents/cs305/assignment_02.docx',
-      sizeInBytes: 1840000,
-      extension: 'DOCX',
-      dateAdded: DateTime.now().subtract(const Duration(days: 2)),
-      course: 'Theory of Automata',
-    ),
-    AppFileModel(
-      id: '4',
-      name: 'Virtual Memory & Paging.pdf',
-      path: '/documents/cs307/virtual_memory.pdf',
-      sizeInBytes: 5120000,
-      extension: 'PDF',
-      dateAdded: DateTime.now().subtract(const Duration(days: 3)),
-      course: 'Operating Systems',
-    ),
-    AppFileModel(
-      id: '5',
-      name: 'Calculus_Formula_Sheet_v3.pdf',
-      path: '/documents/math204/formula_sheet.pdf',
-      sizeInBytes: 890000,
-      extension: 'PDF',
-      dateAdded: DateTime.now().subtract(const Duration(days: 5)),
-      course: 'Calculus',
-      isPinned: true,
-    ),
-    AppFileModel(
-      id: '6',
-      name: 'Relational_Algebra_Cheatsheet.md',
-      path: '/documents/cs302/relational_algebra.md',
-      sizeInBytes: 45000,
-      extension: 'MD',
-      dateAdded: DateTime.now().subtract(const Duration(days: 6)),
-      course: 'Database Systems',
-      isPinned: true,
-    ),
-  ].obs;
+  final RxList<AppFileModel> files = <AppFileModel>[].obs;
+  Future<void> get ready => _restored;
+  bool restoreFailed = false;
+  bool Function(String)? isFileReadOnly;
+  String Function(AppFileModel)? courseLabel;
+
+  String courseFor(AppFileModel file) => courseLabel?.call(file) ?? file.course;
 
   SharedPreferences? _preferences;
   late final Future<void> _restored;
@@ -88,7 +37,7 @@ class FileManagerController extends GetxController {
           (file) => RecentDocument(
             fileId: file.id,
             name: file.name,
-            course: file.course,
+            course: courseFor(file),
             type: file.extension,
             lastOpened: 'Recently',
           ),
@@ -111,6 +60,12 @@ class FileManagerController extends GetxController {
       final restored = <AppFileModel>[];
       for (final item in decoded) {
         final map = Map<String, dynamic>.from(item as Map);
+        if (['1', '2', '3', '4', '5', '6'].contains(map['id']) &&
+            RegExp(r'^/documents/(math204|cs302|cs305|cs307)/')
+                .hasMatch(map['path'] as String) &&
+            !await File(map['path'] as String).exists()) {
+          continue;
+        }
         restored.add(
           AppFileModel(
             id: map['id'] as String,
@@ -133,6 +88,7 @@ class FileManagerController extends GetxController {
       }
       files.assignAll(restored);
     } catch (_) {
+      restoreFailed = true;
       Get.snackbar(
         'Library',
         'The saved file list could not be restored. Your original documents have not been changed.',
@@ -190,7 +146,9 @@ class FileManagerController extends GetxController {
       final matchesSearch =
           searchQuery.value.isEmpty ||
           file.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          file.course.toLowerCase().contains(searchQuery.value.toLowerCase());
+          courseFor(file)
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
 
       final matchesFilter =
           selectedFilter.value == 'ALL' ||
@@ -231,7 +189,12 @@ class FileManagerController extends GetxController {
   }
 
   Future<void> pickAndImportFiles() async {
-    if (isImporting.value) return;
+    await importFiles();
+  }
+
+  Future<List<String>> importFiles() async {
+    if (isImporting.value) return [];
+    final imported = <String>[];
     isImporting.value = true;
     try {
       await _restored;
@@ -249,12 +212,16 @@ class FileManagerController extends GetxController {
           'csv',
         ],
       );
-      if (pickedFiles.isEmpty) return;
+      if (pickedFiles.isEmpty) return imported;
       final root = await getApplicationSupportDirectory();
       final failed = <String>[];
       for (final picked in pickedFiles) {
         final source = picked.path;
         if (source != null && _sourcePaths.containsValue(p.normalize(source))) {
+          final existingId = _sourcePaths.entries
+              .firstWhere((entry) => entry.value == p.normalize(source))
+              .key;
+          imported.add(existingId);
           continue;
         }
         final id = DateTime.now().microsecondsSinceEpoch.toString();
@@ -280,9 +247,10 @@ class FileManagerController extends GetxController {
                   .replaceFirst('.', '')
                   .toUpperCase(),
               dateAdded: DateTime.now(),
-              course: _guessCourseFromName(picked.name),
+              course: 'General',
             ),
           );
+          imported.add(id);
           if (source != null) _sourcePaths[id] = p.normalize(source);
         } catch (_) {
           failed.add(picked.name);
@@ -308,28 +276,7 @@ class FileManagerController extends GetxController {
     } finally {
       isImporting.value = false;
     }
-  }
-
-  String _guessCourseFromName(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('math') ||
-        lower.contains('calc') ||
-        lower.contains('theorem')) {
-      return 'Calculus';
-    } else if (lower.contains('db') ||
-        lower.contains('sql') ||
-        lower.contains('normal')) {
-      return 'Database Systems';
-    } else if (lower.contains('automata') ||
-        lower.contains('cfg') ||
-        lower.contains('chomsky')) {
-      return 'Theory of Automata';
-    } else if (lower.contains('os') ||
-        lower.contains('thread') ||
-        lower.contains('memory')) {
-      return 'Operating Systems';
-    }
-    return 'General';
+    return imported;
   }
 
   void setSearchQuery(String query) {
@@ -364,8 +311,10 @@ class FileManagerController extends GetxController {
     }
     selectedFileId.value = file.id;
     await Get.to<void>(
-      () =>
-          DocumentViewerView(file: file, onTogglePin: () => togglePin(file.id)),
+      () => DocumentViewerView(
+        file: file.copyWith(course: courseFor(file)),
+        onTogglePin: () => togglePin(file.id),
+      ),
     );
   }
 
@@ -391,7 +340,38 @@ class FileManagerController extends GetxController {
     selectedFileId.value = id;
   }
 
+  bool _canEdit(String id) {
+    if (isFileReadOnly?.call(id) != true) return true;
+    Get.snackbar(
+      'Archived file',
+      'Restore the semester before renaming or removing this file.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    return false;
+  }
+
+  Future<void> renameFile(String id, String name) async {
+    await _restored;
+    if (!_canEdit(id)) return;
+    final index = files.indexWhere((file) => file.id == id);
+    if (index < 0) return;
+    final value = name.trim();
+    if (value.isEmpty ||
+        value.length > 180 ||
+        RegExp(r'[<>:"/\\|?*\x00-\x1F]').hasMatch(value)) {
+      throw ArgumentError('Enter a valid file name without path characters.');
+    }
+    final file = files[index];
+    if (p.extension(value).toLowerCase() !=
+        p.extension(file.name).toLowerCase()) {
+      throw ArgumentError('Keep the original file extension.');
+    }
+    files[index] = file.copyWith(name: value);
+    await _saveFiles();
+  }
+
   void removeFile(String id) {
+    if (!_canEdit(id)) return;
     files.removeWhere((file) => file.id == id);
     _sourcePaths.remove(id);
     lastOpened.remove(id);
