@@ -10,7 +10,9 @@ import '../controllers/file_manager_controller.dart';
 import '../models/app_file_model.dart';
 
 class FileManagerTable extends StatelessWidget {
-  const FileManagerTable({super.key});
+  const FileManagerTable({super.key, this.favoritesOnly = false});
+
+  final bool favoritesOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class FileManagerTable extends StatelessWidget {
 
     return Obx(() {
       final palette = themeController.palette;
-      final files = fileController.filteredFiles;
+      final files = fileController.visibleFiles(favoritesOnly: favoritesOnly);
 
       if (files.isEmpty) {
         return Container(
@@ -41,34 +43,37 @@ class FileManagerTable extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'No files found',
+                  favoritesOnly ? 'No favorites found' : 'No files found',
                   style: AppTypography.headlineMd(palette.textPrimary),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Select and import PDF, DOCX, PPT, or notes from your workstation.',
+                  favoritesOnly
+                      ? 'Star a document in All Files, a course, or the viewer to see it here. Check your filters if an item is missing.'
+                      : 'Select and import PDF, DOCX, PPT, or notes from your workstation.',
                   style: AppTypography.bodySm(palette.textSecondary),
                 ),
                 const SizedBox(height: 18),
-                InkWell(
-                  onTap: fileController.pickAndImportFiles,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: palette.primary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Import Files',
-                      style: AppTypography.bodySm(palette.onPrimary)
-                          .copyWith(fontWeight: FontWeight.w600),
+                if (!favoritesOnly)
+                  InkWell(
+                    onTap: fileController.pickAndImportFiles,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: palette.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Import Files',
+                        style: AppTypography.bodySm(palette.onPrimary)
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

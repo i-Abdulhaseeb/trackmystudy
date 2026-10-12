@@ -136,13 +136,20 @@ class FileManagerController extends GetxController {
   }
 
   final RxString searchQuery = ''.obs;
+  final filterResetVersion = 0.obs;
   final RxString selectedFilter = 'ALL'.obs;
   final RxString sortBy = 'date'.obs;
   final RxBool sortAscending = false.obs;
   final RxString selectedFileId = ''.obs;
 
-  List<AppFileModel> get filteredFiles {
+  List<AppFileModel> get favoriteFiles =>
+      files.where((file) => file.isPinned).toList();
+
+  List<AppFileModel> get filteredFiles => visibleFiles();
+
+  List<AppFileModel> visibleFiles({bool favoritesOnly = false}) {
     return files.where((file) {
+      if (favoritesOnly && !file.isPinned) return false;
       final matchesSearch =
           searchQuery.value.isEmpty ||
           file.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
@@ -279,6 +286,12 @@ class FileManagerController extends GetxController {
     return imported;
   }
 
+  void resetFilters() {
+    searchQuery.value = '';
+    selectedFilter.value = 'ALL';
+    filterResetVersion.value++;
+  }
+
   void setSearchQuery(String query) {
     searchQuery.value = query;
   }
@@ -378,12 +391,14 @@ class FileManagerController extends GetxController {
     _saveFiles();
   }
 
-  void togglePin(String id) {
+  Future<void> togglePin(String id) async {
+    await _restored;
+    if (restoreFailed) return;
     final index = files.indexWhere((file) => file.id == id);
     if (index != -1) {
       final current = files[index];
       files[index] = current.copyWith(isPinned: !current.isPinned);
-      _saveFiles();
+      await _saveFiles();
     }
   }
 }

@@ -8,7 +8,9 @@ import '../../../core/widgets/shortcut_badge.dart';
 import '../controllers/file_manager_controller.dart';
 
 class FileManagerToolbar extends StatelessWidget {
-  const FileManagerToolbar({super.key});
+  const FileManagerToolbar({super.key, this.favoritesOnly = false});
+
+  final bool favoritesOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +40,13 @@ class FileManagerToolbar extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'All Files',
+                          favoritesOnly ? 'Favorites' : 'All Files',
                           style: AppTypography.headlineXl(palette.textPrimary),
                         ),
                         const SizedBox(width: 10),
                         MonoBadge(
-                          text: '${fileController.totalFilesCount} FILES',
+                          text:
+                              '${favoritesOnly ? fileController.favoriteFiles.length : fileController.totalFilesCount} FILES',
                           backgroundColor: palette.cardElevated,
                           borderColor: palette.borderSubtle,
                           textColor: palette.textSecondary,
@@ -51,18 +54,21 @@ class FileManagerToolbar extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         const SizedBox(width: 8),
-                        MonoBadge(
-                          text: fileController.formattedTotalStorage,
-                          backgroundColor: palette.cardElevated,
-                          borderColor: palette.borderSubtle,
-                          textColor: palette.textMuted,
-                          fontSize: 10,
-                        ),
+                        if (!favoritesOnly)
+                          MonoBadge(
+                            text: fileController.formattedTotalStorage,
+                            backgroundColor: palette.cardElevated,
+                            borderColor: palette.borderSubtle,
+                            textColor: palette.textMuted,
+                            fontSize: 10,
+                          ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Local document repository, imported syllabus, lecture slides, and notes.',
+                      favoritesOnly
+                          ? 'Your starred documents, saved across courses and the library.'
+                          : 'Local document repository, imported syllabus, lecture slides, and notes.',
                       style: AppTypography.bodySm(palette.textSecondary),
                     ),
                   ],
@@ -131,7 +137,11 @@ class FileManagerToolbar extends StatelessWidget {
                         Icon(Icons.search, size: 14, color: palette.textMuted),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextField(
+                          child: TextFormField(
+                            key: ValueKey(
+                              '$favoritesOnly:${fileController.filterResetVersion.value}',
+                            ),
+                            initialValue: fileController.searchQuery.value,
                             onChanged: fileController.setSearchQuery,
                             style: AppTypography.bodySm(palette.textPrimary),
                             cursorColor: palette.textPrimary,
