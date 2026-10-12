@@ -1,4 +1,5 @@
 import '../../courses/views/course_view.dart';
+import '../../gpa/views/gpa_view.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,6 +36,7 @@ class DashboardView extends StatelessWidget {
       final palette = themeController.palette;
       final activeItem = dashboardController.activeSidebarItem.value;
 
+      final isGpa = activeItem == 'GPA Calculator';
       final isCourses = activeItem == 'My Courses';
       final isExamSchedule = activeItem == 'Exam Schedule';
       final isFileManager =
@@ -47,16 +49,20 @@ class DashboardView extends StatelessWidget {
         body: Column(
           children: [
             const AppTopBar(),
-            if (!isExamSchedule && !isCourses) const AppSubHeader(),
+            if (!isExamSchedule && !isCourses && !isGpa) const AppSubHeader(),
             Expanded(
               child: Row(
                 children: [
                   const AppSidebar(),
                   Expanded(
-                    child: isCourses
+                    child: isGpa
+                        ? const GpaView()
+                        : isCourses
                         ? const CourseView()
                         : isFileManager
-                        ? const FileManagerView()
+                        ? FileManagerView(
+                            favoritesOnly: activeItem == 'Favorites',
+                          )
                         : isExamSchedule
                         ? const ExamView()
                         : Container(

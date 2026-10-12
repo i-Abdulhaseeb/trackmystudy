@@ -183,6 +183,18 @@ class AppSidebar extends StatelessWidget {
                       dashboardController.setActiveTopTab('Schedule');
                     },
                   ),
+                  _buildNavItem(
+                    icon: Icons.calculate_outlined,
+                    label: 'GPA Calculator',
+                    isSelected: activeItem == 'GPA Calculator',
+                    palette: palette,
+                    onTap: () {
+                      dashboardController.setActiveSidebarItem(
+                        'GPA Calculator',
+                      );
+                      dashboardController.setActiveTopTab('GPA Calculator');
+                    },
+                  ),
                   const SizedBox(height: 14),
                   _buildSectionHeader(
                     'LIBRARY',
@@ -195,6 +207,7 @@ class AppSidebar extends StatelessWidget {
                     isSelected: activeItem == 'All Files',
                     palette: palette,
                     onTap: () {
+                      fileController.resetFilters();
                       dashboardController.setActiveSidebarItem('All Files');
                       dashboardController.setActiveTopTab('Library');
                     },
@@ -204,8 +217,15 @@ class AppSidebar extends StatelessWidget {
                     label: 'Favorites',
                     isSelected: activeItem == 'Favorites',
                     palette: palette,
-                    onTap: () =>
-                        dashboardController.setActiveSidebarItem('Favorites'),
+                    trailing: Text(
+                      '${fileController.favoriteFiles.length}',
+                      style: AppTypography.monoCaption(palette.textMuted),
+                    ),
+                    onTap: () {
+                      fileController.resetFilters();
+                      dashboardController.setActiveSidebarItem('Favorites');
+                      dashboardController.setActiveTopTab('Library');
+                    },
                   ),
                   _buildNavItem(
                     icon: Icons.label_outline,
@@ -268,6 +288,7 @@ class AppSidebar extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () {
+                      fileController.resetFilters();
                       dashboardController.setActiveSidebarItem('All Files');
                       dashboardController.setActiveTopTab('Library');
                     },
